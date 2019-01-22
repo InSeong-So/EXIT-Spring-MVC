@@ -300,3 +300,134 @@ MemberDao dao;
 		return mav;
 	}
 ```
+
+## 세션(Session)과 쿠키(Cookie)
+
+#### Connectionless Protocol
+> 웹 서비스는 클라이언트와 서버의 관계를 유지하지 않는 특성을 지닌 HTTP 프로토콜을 기반으로 한다.
+
+```
+# 서버의 부하가 최소화, 기능 구현 어려움
+	클라이언트 |요청(Request) : 서버 연결 / 응답(Response) : 서버 연결 종료 | 서버
+
+
+# 서버와 클라이언트의 연결 상태를 유지
+	클라이언트 | 로그인 요청 / 응답, 상품 주문 요청 / 응답 | 서버
+```
+>> 이는 서버의 부하를 줄일 수 있는 장점은 있으나 클라이언트의 요청마다 매번 새로운 연결이 생성되어 일반적인 상태 유지 기능의 구현이 어렵다.
+>>> 이러한 Connectionless Protocol의 불편함을 해결하기 위해서 세션과 쿠키를 이용한다.
+>>>> 세션과 쿠키는 클라이언트-서버의 연결을 유지해주는 방법이다.
+
+| 방법 | 내용 |
+| ------------- |:-------------:|
+| 세션 | 서버에서 연결 정보를 관리 |
+| 쿠키 | 클라이언트에서 연결 정보를 관리 |
+
+<hr>
+
+### 세션(Session)
+> 패키지 com.spring.basic2
+
+#### HttpServletRequest를 이용한 세션 사용
+> 컨트롤러의 메소드에서 파라미터로 HttpServletRequest를 받으면 된다.
+>> 회원정보 수정 또는 삭제 요청
+>>> 세션에 Member 속성이 존재하는가?
+	* NO : Exception 발생
+	* YES : 회원정보 수정 또는 삭제 성공 응답
+
+```
+# 사용 방법
+	HttpSession session = request.getSession();
+	session.setAttribute("세션 이름", 값);
+```
+
+#### HttpSession을 이용한 세션 사용
+> HttpServletRequest, HttpSession의 차이점은 거의 없으므로 차이점은 `세션 객체를 어떻게 가져오느냐` 정도이다.
+
+```
+# HttpServletRequest
+	파라미터로 HttpServletRequest를 받고 getSession()으로 세션을 가져와 사용
+		public String memLogin(Member member, HttpServletRequest request){...}
+
+# HttpSession
+	파라미터로 HttpSession을 받아 사용
+		public String memLogin(Member member, HttpSession session){...}
+```
+
+#### 세션 삭제
+> 저장된 속성이 더 이상 필요 없을 때 시행하며 주로 로그아웃 또는 회원 탈퇴 등에 사용된다.
+```
+session.invalidate();
+```
+
+#### 세션 주요 메소드 및 플로어
+| 세션 메소드 | 기능 |
+| ------- | --- |
+| getId() | 세션 ID를 반환한다. |
+| setAttribute() | 세션 객체에 속성을 저장한다. |
+| getAttribute() | 세션 객체에 저장된 속성을 반환한다. |
+| removeAttrivte() | 세션 객체에 저장된 속성을 제거한다. |
+| setMaxInactiveInterval() | 세션 객체의 유지 시간을 설정한다. |
+| getMaxInactiveInterval() | 세션 객체의 유지시간을 반환한다. |
+| invalidate() | 세션 객체의 모든 정보를 삭제한다. |
+
+```
+# 세션 흐름
+	1. 클라이언트 : 서버에게 연결 요청
+	2. 서버 : setAttribute("member", mem);
+	3. 세션 : member 속성 저장
+	4. 서버 : 클라이언트에게 응답
+	5. 클라이언트 : 서버에게 특정 행동 요청
+	6. 서버 : getAttribute("member");
+	7. 세션 : member 속성 반환
+	8. 서버 : 클라이언트에게 응답
+```
+
+<hr>
+
+### 쿠키(Cookie)
+> 패키지 com.spring.basic3
+
+#### @CookieValue 어노테이션을 이용한 쿠키 사용
+> @CookieValue 어노테이션의 value 속성은 쿠키 이름으로, value에 명시한 쿠키가 없을 경우 Exception이 발생한다.
+>> required 속성으로 예외를 막으며 default 값이 `true`로 required를 false로 설정하면 예외 방지할 수 있다.
+
+```
+# 쿠키 설정
+	@RequestMappin("/index")
+	public String mallIndex(Mall mall, HttpServletResponse response){
+		Cookie genderCookie = new Cookie("gender", mall.getGender());
+		
+		// 쿠키의 존재 여부 확인
+		if(mall.isCookieDel()){
+		
+			// 쿠키가 존재하는 시간 설정
+			genderCookie.seMaxAge(0);
+			mall.setGender(null);
+		} else {
+		
+			// 쿠키 존재시간 설정 : 1분 * 1시간 * 24시간 * 30일 = 한달을 초로 환산한 시간
+			genderCookie.setMaxAge(60*60*24*30);
+		}
+			response.addCookie(genderCookie);
+		return "/mall/main";
+	}
+
+# 쿠키 가져오기
+	@RequestMappin("/index")
+	public String mallIndex(Mall mall, @CookieValue(value="gender",
+		required=false) Cookie genderCookie, HttpServletRequest request){
+		
+		if(genderCookie != null){
+			
+			// 쿠키 값 가져오기
+			mall.setGender(genderCookie.getValue());
+		}	
+		
+		return "/mall/index";
+	}
+```
+
+
+
+
