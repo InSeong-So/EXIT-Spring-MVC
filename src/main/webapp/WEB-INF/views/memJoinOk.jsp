@@ -5,11 +5,19 @@
 	<title>Home</title>
 </head>
 <body>
+<!-- 	파라미터를 사용하는 방법 -->
 	<h1> memJoinOk </h1>
 	ID : ${memId}<br />
 	PW : ${memPw}<br />
 	Mail : ${memMail} <br />
 	Phone : ${memPhone} <br />
+
+<!-- 	커맨드 객체를 사용하는 방법 -->
+<!-- 	<h1> memJoinOk </h1> -->
+<%-- 	ID : ${member.memId}<br /> --%>
+<%-- 	PW : ${member.memPw}<br /> --%>
+<%-- 	Mail : ${member.memMail} <br /> --%>
+<%-- 	Phone : ${member.memPhone1} ${member.memPhone2} ${member.memPhone3}<br /> --%>
 	
 	<a href="/basic/resources/html/memJoin.html"> Go MemberJoin </a>
 </body>

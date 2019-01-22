@@ -19,6 +19,7 @@ public class MemberController {
 	@Resource(name="memService")
 	MemberService service;
 	
+	// 파라미터를 받아 그대로 사용하는 방법
 	@RequestMapping(value="/memJoin", method=RequestMethod.POST)
 	public String memJoin(Model model, HttpServletRequest request) {
 		String memId = request.getParameter("memId");
@@ -37,6 +38,15 @@ public class MemberController {
 		
 		return "memJoinOk";
 	}
+	
+	// 커맨드 객체를 사용하는 방법
+//	@RequestMapping(value="/memJoin", method=RequestMethod.POST)
+//	public String memJoin(Member member) {
+//		
+//		service.memberRegister(member.getMemId(), member.getMemPw(), member.getMemMail(), member.getMemPhone1(), member.getMemPhone2(), member.getMemPhone3());
+//		
+//		return "memJoinOk";
+//	}
 	
 	@RequestMapping(value="/memLogin", method=RequestMethod.POST)
 	public String memLogin(Model model, HttpServletRequest request) {
